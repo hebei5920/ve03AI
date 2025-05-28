@@ -7,20 +7,19 @@ import Link from 'next/link'
 import { FcGoogle } from 'react-icons/fc'
 import { FaGithub } from 'react-icons/fa'
 import { useTranslation } from '@/providers/language-provider'
-import { useAuth } from '@/providers/auth-provider'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginPage() {
   const [loginLoading, setLoginLoading] = useState<string | null>(null)
   const router = useRouter()
   const { t } = useTranslation()
-  const { user, loading, login } = useAuth()
+  const { user, loading, signInWithProvider } = useAuth()
 
   // Handle Google login
   const handleGoogleLogin = async () => {
     setLoginLoading('google')
     try {
-      await login('google')
-      router.push('/')
+      await signInWithProvider('google')
     } catch (error) {
       console.error('Login failed:', error)
       setLoginLoading(null)
@@ -31,8 +30,7 @@ export default function LoginPage() {
   const handleGithubLogin = async () => {
     setLoginLoading('github')
     try {
-      await login('github')
-      router.push('/')
+      await signInWithProvider('github')
     } catch (error) {
       console.error('Login failed:', error)
       setLoginLoading(null)
@@ -64,7 +62,7 @@ export default function LoginPage() {
               <span className="text-xl font-bold text-orange-500">VE</span>
             </div>
           </div>
-          
+
           <h2 className="text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             {t('auth.signIn.title') || 'Sign in to your account'}
           </h2>
@@ -84,12 +82,12 @@ export default function LoginPage() {
             ) : (
               <FcGoogle className="h-5 w-5" />
             )}
-            {loginLoading === 'google' 
+            {loginLoading === 'google'
               ? t('auth.signIn.loggingIn') || 'Logging in...'
               : t('auth.signIn.continueWithGoogle') || 'Continue with Google'
             }
           </Button>
-          
+
           <Button
             onClick={handleGithubLogin}
             disabled={loginLoading !== null}
@@ -101,12 +99,12 @@ export default function LoginPage() {
             ) : (
               <FaGithub className="h-5 w-5" />
             )}
-            {loginLoading === 'github' 
+            {loginLoading === 'github'
               ? t('auth.signIn.loggingIn') || 'Logging in...'
               : t('auth.signIn.continueWithGithub') || 'Continue with GitHub'
             }
           </Button>
-          
+
           {/* Divider */}
           <div className="relative my-2">
             <div className="absolute inset-0 flex items-center">
@@ -118,17 +116,17 @@ export default function LoginPage() {
               </span>
             </div>
           </div>
-          
+
           {/* Back to home button */}
           <Link href="/">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full text-gray-700 dark:text-gray-200"
             >
               {t('common.backToHome') || 'Back to home'}
             </Button>
           </Link>
-          
+
           {/* Terms and conditions */}
           <div className="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">
             <p>

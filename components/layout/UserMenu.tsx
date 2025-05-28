@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/providers/auth-provider'
+import { useAuth } from '@/hooks/useAuth'
 import { useTranslation } from '@/providers/language-provider'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { FaUser, FaSignOutAlt, FaCreditCard } from 'react-icons/fa'
@@ -13,9 +13,32 @@ interface UserMenuProps {
 }
 
 export default function UserMenu({ variant = 'default' }: UserMenuProps) {
-  const { user, logout } = useAuth()
+  const { user, signOut } = useAuth()
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+
+  // Helper functions to get user data from Supabase user object
+  const getUserName = () => {
+    if (!user) return ''
+    return user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+  }
+
+  const getUserAvatar = () => {
+    if (!user) return null
+    return user.user_metadata?.avatar_url || user.user_metadata?.picture || null
+  }
+
+  const getUserPlan = () => {
+    // Since Supabase user doesn't have plan info, we'll default to 'free'
+    // In a real app, you'd fetch this from your database
+    return 'free'
+  }
+
+  const getUserCredits = () => {
+    // Since Supabase user doesn't have credits info, we'll default to 0
+    // In a real app, you'd fetch this from your database
+    return 0
+  }
 
   if (!user) {
     return (
@@ -31,6 +54,11 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
     )
   }
 
+  const userName = getUserName()
+  const userAvatar = getUserAvatar()
+  const userPlan = getUserPlan()
+  const userCredits = getUserCredits()
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -41,10 +69,10 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
             className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 px-3"
           >
             <div className="h-6 w-6 rounded-full overflow-hidden">
-              {user.avatar ? (
+              {userAvatar ? (
                 <img 
-                  src={user.avatar} 
-                  alt={user.name} 
+                  src={userAvatar} 
+                  alt={userName} 
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -53,14 +81,14 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
                 </div>
               )}
             </div>
-            <span className="text-sm font-medium truncate max-w-[100px]">{user.name}</span>
+            <span className="text-sm font-medium truncate max-w-[100px]">{userName}</span>
           </Button>
         ) : (
           <Button variant="outline" size="icon" className="rounded-full overflow-hidden border-orange-300 dark:border-orange-800">
-            {user.avatar ? (
+            {userAvatar ? (
               <img 
-                src={user.avatar} 
-                alt={user.name} 
+                src={userAvatar} 
+                alt={userName} 
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -73,10 +101,10 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
         <div className="flex flex-col h-full">
           <div className="flex items-center gap-4 py-4 border-b">
             <div className="h-12 w-12 rounded-full overflow-hidden border border-orange-300 dark:border-orange-800">
-              {user.avatar ? (
+              {userAvatar ? (
                 <img 
-                  src={user.avatar} 
-                  alt={user.name} 
+                  src={userAvatar} 
+                  alt={userName} 
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -86,7 +114,7 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
               )}
             </div>
             <div>
-              <h3 className="font-medium text-lg">{user.name}</h3>
+              <h3 className="font-medium text-lg">{userName}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
             </div>
           </div>
@@ -99,12 +127,12 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium">{t('user.plan') || 'Current Plan'}</p>
-                  <p className="text-xs capitalize text-gray-500 dark:text-gray-400">{user.plan}</p>
+                  <p className="text-xs capitalize text-gray-500 dark:text-gray-400">{userPlan}</p>
                 </div>
               </div>
               <Link href="/pricing" onClick={() => setOpen(false)}>
                 <Button size="sm" variant="outline">
-                  {user.plan === 'free' ? (t('user.upgrade') || 'Upgrade') : (t('user.manage') || 'Manage')}
+                  {userPlan === 'free' ? (t('user.upgrade') || 'Upgrade') : (t('user.manage') || 'Manage')}
                 </Button>
               </Link>
             </div>
@@ -118,7 +146,7 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium">{t('user.credits') || 'Credits'}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.credits} {t('user.available') || 'available'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{userCredits} {t('user.available') || 'available'}</p>
                 </div>
               </div>
             </div>
@@ -126,8 +154,8 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
 
           <div className="mt-auto pt-4 border-t">
             <Button 
-              onClick={() => {
-                logout()
+              onClick={async () => {
+                await signOut()
                 setOpen(false)
               }} 
               variant="outline" 
