@@ -41,7 +41,7 @@ export default function PricingFAQ() {
 
   return (
     <section className="py-12 bg-gray-50 dark:bg-gray-900/50">
-      <div className="container px-4 md:px-6">
+      <div className="container px-4 md:px-6 mx-auto">
         <div className="mx-auto mb-10 max-w-3xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4 text-orange-500">
             {t('pricing.faq.title')}

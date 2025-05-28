@@ -1,13 +1,48 @@
 'use client';
 
 import { useTranslation } from '@/providers/language-provider';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play } from 'lucide-react';
+import { Play, X } from 'lucide-react';
 
 export default function Showcase() {
   const { t } = useTranslation();
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+
+  // 添加ESC键关闭功能
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    if (activeVideo) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [activeVideo]);
+
+  // 关闭模态框with动画
+  const closeModal = () => {
+    setIsClosing(true);
+    // 等待动画完成后再移除模态框
+    setTimeout(() => {
+      setActiveVideo(null);
+      setIsClosing(false);
+    }, 200);
+  };
+
+  // 点击遮罩层关闭
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      closeModal();
+    }
+  };
 
   // Sample showcase videos
   const videos = [
@@ -20,6 +55,9 @@ export default function Showcase() {
     { id: 'video7', thumbnail: '/images/showcase/showcase-7.jpg', alt: 'Cityscape' },
   ];
 
+  // 复制视频数组以实现无限滚动
+  const duplicatedVideos = [...videos, ...videos, ...videos];
+
   return (
     <section className="py-12">
       <div className="container px-4 mx-auto">
@@ -27,51 +65,83 @@ export default function Showcase() {
           {t('showcase.title')}
         </h2>
 
-        <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4">
-          {videos.map((video) => (
-            <div
-              key={video.id}
-              className="relative aspect-[9/16] rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800 cursor-pointer group"
-              onClick={() => setActiveVideo(video.id)}
-            >
-              {/* This would be an actual image in production */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  variant="default" 
-                  size="icon" 
-                  className="h-10 w-10 rounded-full bg-orange-500 hover:bg-orange-600"
-                >
-                  <Play className="h-5 w-5 text-white" />
-                </Button>
+        <div className="overflow-hidden">
+          <div className="flex animate-scroll-infinite gap-4">
+            {duplicatedVideos.map((video, index) => (
+              <div
+                key={`${video.id}-${index}`}
+                className="relative aspect-[9/16] w-32 sm:w-40 md:w-48 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800 cursor-pointer group"
+                onClick={() => setActiveVideo(video.id)}
+              >
+                {/* This would be an actual image in production */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button 
+                    variant="default" 
+                    size="icon" 
+                    className="h-10 w-10 rounded-full bg-orange-500 hover:bg-orange-600"
+                  >
+                    <Play className="h-5 w-5 text-white" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Video modal would be implemented here in a real application */}
+        {/* Video modal */}
         {activeVideo && (
-          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden max-w-3xl w-full max-h-[80vh] relative">
+          <div 
+            className={`fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 transition-all duration-200 ${
+              isClosing ? 'opacity-0' : 'opacity-100'
+            }`}
+            onClick={handleOverlayClick}
+          >
+            <div className={`bg-white dark:bg-gray-900 rounded-xl overflow-hidden max-w-4xl w-full max-h-[90vh] relative transition-all duration-200 ${
+              isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+            }`}>
               <Button 
                 variant="ghost" 
-                size="sm" 
-                className="absolute top-2 right-2 z-10" 
-                onClick={() => setActiveVideo(null)}
+                size="icon" 
+                className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-black/20 hover:bg-black/40 text-white hover:text-white transition-all duration-200 hover:scale-110" 
+                onClick={closeModal}
               >
-                {t('showcase.close')}
+                <X className="h-5 w-5" />
               </Button>
               <div className="aspect-video w-full bg-black">
                 {/* Video player would go here */}
                 <div className="flex items-center justify-center h-full text-white">
-                  {t('showcase.videoPlaying', { id: activeVideo })}
+                  <div className="text-center">
+                    <Play className="h-16 w-16 mx-auto mb-4 text-orange-500" />
+                    <p className="text-lg">Video Playing: {activeVideo}</p>
+                    <p className="text-sm text-gray-400 mt-2">Press ESC to close</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        @keyframes scroll-infinite {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(calc(-100% / 3));
+          }
+        }
+        
+        .animate-scroll-infinite {
+          animation: scroll-infinite 30s linear infinite;
+        }
+        
+        .animate-scroll-infinite:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
     </section>
   );
 }

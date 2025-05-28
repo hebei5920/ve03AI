@@ -1,28 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslation } from '@/providers/language-provider';
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  Play, 
-  Heart, 
-  MessageSquare, 
-  Copy, 
-  ExternalLink 
-} from 'lucide-react';
+import { Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function Examples() {
   const { t } = useTranslation();
-  const [activeSlide, setActiveSlide] = useState(0);
   
   const examples = [
     {
@@ -67,15 +56,91 @@ export default function Examples() {
       date: "May 21, 2025",
       time: "5:32 AM"
     },
+    {
+      id: 4,
+      title: "Exploring the boundaries of AI-generated content",
+      description: "A mesmerizing journey through an AI-generated landscape, where every frame tells a story. The seamless blend of reality and imagination creates an immersive experience that challenges our perception of what's possible.",
+      author: {
+        name: "Sarah Chen",
+        username: "sarahchen",
+        avatar: "/avatars/sarah.jpg"
+      },
+      likes: 342,
+      comments: 45,
+      date: "May 25, 2025",
+      time: "2:15 PM"
+    },
+    {
+      id: 5,
+      title: "The future of storytelling",
+      description: "Witness how AI transforms simple prompts into compelling narratives. From character development to scene composition, every element comes together to create a cohesive story.",
+      author: {
+        name: "Marcus Wong",
+        username: "marcusw",
+        avatar: "/avatars/marcus.jpg"
+      },
+      likes: 189,
+      comments: 23,
+      date: "May 24, 2025",
+      time: "11:30 AM"
+    },
+    {
+      id: 6,
+      title: "Creative possibilities unleashed",
+      description: "Breaking free from traditional constraints, we explore new dimensions of creativity. The results are nothing short of extraordinary.",
+      author: {
+        name: "Emma Rodriguez",
+        username: "emmar",
+        avatar: "/avatars/emma.jpg"
+      },
+      likes: 276,
+      comments: 31,
+      date: "May 23, 2025",
+      time: "9:45 AM"
+    },
+    {
+      id: 7,
+      title: "A day in the life of an AI artist",
+      description: "Follow along as we document the creative process behind AI-generated art. From concept to final render, see how technology enhances human creativity.",
+      author: {
+        name: "David Kim",
+        username: "davidk",
+        avatar: "/avatars/david.jpg"
+      },
+      likes: 156,
+      comments: 19,
+      date: "May 22, 2025",
+      time: "3:20 PM"
+    },
+    {
+      id: 8,
+      title: "The evolution of digital storytelling",
+      description: "How AI is revolutionizing the way we tell stories. Experience the perfect blend of technology and creativity in this groundbreaking demonstration.",
+      author: {
+        name: "Lisa Patel",
+        username: "lisap",
+        avatar: "/avatars/lisa.jpg"
+      },
+      likes: 203,
+      comments: 27,
+      date: "May 21, 2025",
+      time: "1:10 PM"
+    },
+    {
+      id: 9,
+      title: "Breaking new ground in visual effects",
+      description: "Pushing the boundaries of what's possible with AI-generated visual effects. The results are stunning, realistic, and completely generated from text prompts.",
+      author: {
+        name: "Alex Thompson",
+        username: "alext",
+        avatar: "/avatars/alex.jpg"
+      },
+      likes: 289,
+      comments: 34,
+      date: "May 20, 2025",
+      time: "10:30 AM"
+    }
   ];
-
-  const handlePrev = () => {
-    setActiveSlide((prev) => (prev === 0 ? examples.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setActiveSlide((prev) => (prev === examples.length - 1 ? 0 : prev + 1));
-  };
 
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
@@ -89,48 +154,23 @@ export default function Examples() {
           </p>
         </div>
 
-        <div className="relative max-w-5xl mx-auto">
-          {/* Mobile view (vertical stack) */}
+        <div className="max-w-7xl mx-auto">
+          {/* Mobile view (single column) */}
           <div className="md:hidden space-y-6">
             {examples.map((example) => (
-              <ExampleCard key={example.id} example={example} />
-            ))}
-          </div>
-
-          {/* Desktop view (carousel) */}
-          <div className="hidden md:grid grid-cols-3 gap-6">
-            {examples.map((example, index) => (
-              <div 
-                key={example.id} 
-                className={`transition-all duration-300 ${
-                  index === activeSlide 
-                    ? 'opacity-100 scale-105 z-10' 
-                    : 'opacity-70 scale-95'
-                }`}
-              >
+              <div key={example.id} className="w-full">
                 <ExampleCard example={example} />
               </div>
             ))}
           </div>
 
-          {/* Navigation arrows */}
-          <div className="hidden md:flex justify-between absolute top-1/2 -translate-y-1/2 left-0 right-0 -mx-12">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm shadow-md" 
-              onClick={handlePrev}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm shadow-md" 
-              onClick={handleNext}
-            >
-              <ArrowRight className="h-5 w-5" />
-            </Button>
+          {/* Desktop view (grid) */}
+          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {examples.map((example) => (
+              <div key={example.id} className="w-full">
+                <ExampleCard example={example} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -143,27 +183,21 @@ function ExampleCard({ example }: { example: any }) {
   
   return (
     <Card className="overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader className="p-4 border-b border-gray-100 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Avatar>
-              <AvatarImage src={example.author.avatar} alt={example.author.name} />
-              <AvatarFallback>{example.author.name.substring(0, 2)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium">{example.author.name}</div>
-              <div className="text-xs text-muted-foreground">@{example.author.username}</div>
-            </div>
+      <CardHeader className="p-4">
+        <div className="flex items-center space-x-3">
+          <Avatar>
+            <AvatarImage src={example.author.avatar} alt={example.author.name} />
+            <AvatarFallback>{example.author.name.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{example.author.name}</div>
+            <div className="text-xs text-muted-foreground">@{example.author.username}</div>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <ExternalLink className="h-4 w-4" />
-          </Button>
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="pt-4 px-4">
-          <h3 className="font-semibold text-sm mb-2">{example.title}</h3>
-          <p className="text-xs text-muted-foreground mb-4 line-clamp-3">{example.description}</p>
+        <div className="px-4 pb-4">
+          <h3 className="font-semibold text-sm mb-4">{example.title}</h3>
         </div>
         <div className="relative aspect-video bg-gray-200 dark:bg-gray-700 overflow-hidden">
           {/* Video player placeholder */}
@@ -180,23 +214,10 @@ function ExampleCard({ example }: { example: any }) {
             {example.time}
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="p-4 flex items-center justify-between">
-        <div className="flex space-x-4">
-          <Button variant="ghost" size="sm" className="h-8 px-2 text-pink-500">
-            <Heart className="h-4 w-4 mr-1" />
-            <span className="text-xs">{example.likes}</span>
-          </Button>
-          <Button variant="ghost" size="sm" className="h-8 px-2">
-            <MessageSquare className="h-4 w-4 mr-1" />
-            <span className="text-xs">{example.comments}</span>
-          </Button>
+        <div className="px-4 pt-4 pb-4">
+          <p className="text-xs text-muted-foreground">{example.description}</p>
         </div>
-        <Button variant="ghost" size="sm" className="h-8 px-2">
-          <Copy className="h-4 w-4 mr-1" />
-          <span className="text-xs">{t('examples.copyLink')}</span>
-        </Button>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 }
