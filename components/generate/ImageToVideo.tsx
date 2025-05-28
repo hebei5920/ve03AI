@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { ImageToVideoFormData, ModelVersion, VideoQuality, VideoDuration, VideoStyle } from './types'
 import { useForm, Controller } from 'react-hook-form'
-import { Info, Upload, X } from 'lucide-react'
+import { Info, Upload, X, Loader2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -31,7 +31,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-
+import { createClient } from '@/lib/supabase-client'
 interface ImageToVideoProps {
   onSubmit: (data: ImageToVideoFormData) => void
   isGenerating: boolean
@@ -47,7 +47,9 @@ const QUALITY_OPTIONS: { value: VideoQuality; label: string }[] = [
 export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoProps) {
   const { t } = useTranslation()
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const supabase = createClient()
 
   const { register, handleSubmit, watch, control, setValue, formState: { errors, isValid } } = useForm<ImageToVideoFormData>({
     defaultValues: {
@@ -68,7 +70,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
   const watchDuration = watch('duration')
 
   // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -79,14 +81,56 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
       return
     }
 
-    setValue('image', file)
-    
-    // Create image preview
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      setImagePreview(e.target?.result as string)
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert(t('generator.errors.fileTooLarge') || 'File size must be less than 10MB')
+      return
     }
-    reader.readAsDataURL(file)
+
+    try {
+      setIsUploading(true)
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      // Create FormData
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userId', user.id)
+
+      // Upload image using API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to upload image')
+      }
+
+      const result = await response.json()
+      console.log('Uploaded image URL:', result.url)
+      console.log('Uploaded image path:', result.path)
+
+      setValue('image', file)
+
+      // Create image preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert(t('generator.errors.uploadFailed') || 'Failed to upload image')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   // Remove selected image
@@ -100,7 +144,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
 
   // Check if 8s duration is available
   const is8sAvailable = watchQuality !== '1080p'
-  
+
   // Check if fast motion is available
   const isFastMotionAvailable = watchDuration === 5 && watchQuality !== '1080p'
 
@@ -121,7 +165,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
           {t('generator.imageUpload.title') || 'Upload Your Image'}
         </h3>
-        
+
         <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center">
           <input
             type="file"
@@ -129,17 +173,23 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
             className="hidden"
             accept=".jpg,.jpeg,.png,.webp"
             onChange={handleFileChange}
-            disabled={isGenerating}
+            disabled={isGenerating || isUploading}
           />
-          
+
           {!imagePreview ? (
             <div
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer"
             >
-              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              {isUploading ? (
+                <Loader2 className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
+              ) : (
+                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              )}
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {t('generator.imageUpload.instruction') || 'Click or drag and drop to upload an image'}
+                {isUploading
+                  ? (t('generator.imageUpload.uploading') || 'Uploading...')
+                  : (t('generator.imageUpload.instruction') || 'Click or drag and drop to upload an image')}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-500">
                 {t('generator.imageUpload.formats') || 'JPG, PNG or WEBP (max 10MB)'}
@@ -153,9 +203,11 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
                   e.stopPropagation()
                   fileInputRef.current?.click()
                 }}
-                disabled={isGenerating}
+                disabled={isGenerating || isUploading}
               >
-                {t('generator.imageUpload.button') || 'Select Image'}
+                {isUploading
+                  ? (t('generator.imageUpload.uploading') || 'Uploading...')
+                  : (t('generator.imageUpload.button') || 'Select Image')}
               </Button>
             </div>
           ) : (
@@ -331,12 +383,12 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
                   onValueChange={(val) => {
                     const quality = QUALITY_OPTIONS[val[0]].value
                     field.onChange(quality)
-                    
+
                     // Automatically adjust duration if 1080p is selected
                     if (quality === '1080p' && watchDuration === 8) {
                       setValue('duration', 5)
                     }
-                    
+
                     // Disable fast motion if 1080p is selected
                     if (quality === '1080p' && watch('motionMode') === 'fast') {
                       setValue('motionMode', 'normal')
@@ -399,8 +451,8 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
                   render={({ field }) => (
                     <div className="flex items-center space-x-2">
                       <Label htmlFor="motion-mode" className={!isFastMotionAvailable ? "text-gray-400 dark:text-gray-600" : ""}>
-                        {field.value === 'normal' ? 
-                          (t('generator.params.motionModeNormal') || 'Normal') : 
+                        {field.value === 'normal' ?
+                          (t('generator.params.motionModeNormal') || 'Normal') :
                           (t('generator.params.motionModeFast') || 'Fast')}
                       </Label>
                       <Switch
@@ -417,7 +469,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>
-                                {watchQuality === '1080p' 
+                                {watchQuality === '1080p'
                                   ? (t('generator.tooltips.noFastIn1080p') || 'Fast motion is not available in 1080p quality')
                                   : (t('generator.tooltips.noFastIn8s') || 'Fast motion is only available for 5s videos')}
                               </p>
@@ -532,8 +584,8 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
         className="w-full bg-orange-500 hover:bg-orange-600"
         disabled={!imagePreview || isGenerating || !isValid}
       >
-        {isGenerating 
-          ? (t('generator.generating') || 'Generating...') 
+        {isGenerating
+          ? (t('generator.generating') || 'Generating...')
           : (t('generator.generateButton') || 'Generate Video')}
       </Button>
     </form>
