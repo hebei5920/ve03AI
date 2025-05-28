@@ -17,7 +17,7 @@ export default function CallToAction() {
           <p className="text-xl mb-8 opacity-90">
             {t('cta.description')}
           </p>
-          <Link href="/dashboard">
+          <Link href="/generate">
             <Button 
               size="lg" 
               className="bg-white text-orange-500 hover:bg-gray-100 font-medium px-8 rounded-full"

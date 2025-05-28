@@ -146,7 +146,7 @@ export default function PricingPlans() {
                 ))}
               </ul>
               <div className="mt-auto">
-                <Link href="/auth/register">
+                <Link href="/login">
                   <Button 
                     className={`w-full ${plan.buttonVariant === 'default' ? 'bg-orange-500 hover:bg-orange-600' : ''}`}
                     variant={plan.buttonVariant}

@@ -98,7 +98,7 @@ export class AuthService {
  *       const result = await AuthService.handleOAuthCallback(data.user);
  *       
  *       // 重定向到应用
- *       return NextResponse.redirect('/dashboard');
+ *       return NextResponse.redirect('/generate');
  *     }
  *   }
  *   

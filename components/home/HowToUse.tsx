@@ -76,7 +76,7 @@ export default function HowToUse() {
         </div>
 
         <div className="mt-16 text-center">
-          <Link href="/dashboard">
+          <Link href="/generate">
             <Button 
               size="lg" 
               className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 rounded-full"

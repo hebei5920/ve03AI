@@ -1,8 +1,6 @@
 'use client';
 
 import { useTranslation } from '@/providers/language-provider';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import PricingPlans from '@/components/pricing/PricingPlans';
 import PricingComparison from '@/components/pricing/PricingComparison';
 import PricingFAQ from '@/components/pricing/PricingFAQ';
@@ -13,8 +11,7 @@ export default function PricingPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
+    <>
       <main className="flex-grow">
         {/* Hero section */}
         <section className="relative py-20 md:py-32 bg-gradient-to-b from-amber-50/50 to-white dark:from-orange-950/20 dark:to-background">
@@ -49,7 +46,7 @@ export default function PricingPage() {
               <p className="text-xl mb-8 opacity-90">
                 {t('pricing.cta.description')}
               </p>
-              <Link href="/auth/register">
+              <Link href="/login">
                 <Button 
                   size="lg" 
                   className="bg-white text-orange-500 hover:bg-gray-100 font-medium px-8 rounded-full"
@@ -61,7 +58,6 @@ export default function PricingPage() {
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
+    </>
   );
 }

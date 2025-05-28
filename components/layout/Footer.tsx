@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useTranslation } from '@/providers/language-provider';
+import { SupportedLanguage } from '@/i18n';
 
 export default function Footer() {
-  const { t } = useTranslation();
+  const { t, setLanguage, language } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   const languages = [
@@ -25,7 +26,7 @@ export default function Footer() {
 
   return (
     <footer className="border-t bg-background/80 backdrop-blur-sm">
-      <div className="container py-12 px-4 md:px-6">
+      <div className="container py-12 px-4 md:px-6 mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">{t('footer.platform')}</h3>
@@ -36,7 +37,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/generate" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {t('footer.generate')}
                 </Link>
               </li>
@@ -76,23 +77,22 @@ export default function Footer() {
               <h3 className="text-lg font-semibold mb-2">{t('footer.languages')}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {languages.map((lang) => (
-                  <Link 
+                  <button
                     key={lang.code}
-                    href={`/${lang.code}`} 
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setLanguage(lang.code as SupportedLanguage)}
+                    className={`text-xs transition-colors px-2 py-1 rounded
+                      ${language === lang.code
+                        ? 'bg-orange-500 text-white'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'}
+                    `}
+                    type="button"
                   >
                     {lang.name}
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
-        </div>
-        <div className="mt-10 pt-6 border-t text-center text-sm text-muted-foreground">
-          <p>© {currentYear} Veo 3 주식회사 블루콜(BLUE CALL). {t('footer.allRightsReserved')}</p>
-          <p className="mt-2 text-xs">
-            Veo3.ai {t('footer.independent')}
-          </p>
         </div>
       </div>
     </footer>

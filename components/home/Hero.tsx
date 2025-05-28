@@ -25,7 +25,7 @@ export default function Hero() {
             {t('hero.description')}
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard">
+            <Link href="/generate">
               <Button 
                 size="lg" 
                 className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 rounded-full"
@@ -65,10 +65,6 @@ export default function Hero() {
           )}
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ChevronDown className="h-8 w-8 text-muted-foreground" />
-        </div>
       </div>
     </section>
   );

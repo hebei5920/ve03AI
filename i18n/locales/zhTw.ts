@@ -9,8 +9,14 @@ export default {
     home: '首頁',
     generate: '生成',
     pricing: '定價',
-    login: '登錄',
-    signUp: '註冊'
+    login: '登錄'
+  },
+  
+  // 主题
+  theme: {
+    toggle: '切換主題',
+    switchToLight: '切換到亮色模式',
+    switchToDark: '切換到暗色模式'
   },
   
   // 定价页面

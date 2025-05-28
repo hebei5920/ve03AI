@@ -9,8 +9,91 @@ export default {
     home: 'Home',
     generate: 'Generate',
     pricing: 'Pricing',
-    login: 'Login',
-    signUp: 'Sign Up'
+    login: 'Login'
+  },
+  
+  // Theme
+  theme: {
+    toggle: 'Toggle theme',
+    switchToLight: 'Switch to light mode',
+    switchToDark: 'Switch to dark mode'
+  },
+  
+  // Video Generator
+  generator: {
+    title: 'AI Video Generator',
+    subtitle: 'Transform your images and text into stunning videos with AI',
+    tabs: {
+      imageToVideo: 'Image to Video',
+      textToVideo: 'Text to Video'
+    },
+    imageUpload: {
+      title: 'Upload Your Image',
+      instruction: 'Click or drag and drop to upload an image',
+      formats: 'JPG, PNG or WEBP (max 10MB)',
+      button: 'Select Image'
+    },
+    textInput: {
+      title: 'Enter Your Text',
+      instruction: 'Text Description'
+    },
+    params: {
+      duration: 'Video Duration',
+      modelVersion: 'Model Version',
+      quality: 'Video Quality',
+      prompt: 'Prompt',
+      aspectRatio: 'Aspect Ratio',
+      motionMode: 'Motion Mode',
+      motionModeNormal: 'Normal',
+      motionModeFast: 'Fast',
+      negativePrompt: 'Negative Prompt',
+      seed: 'Random Seed',
+      style: 'Style Preset',
+      watermark: 'Add watermark',
+      selectModel: 'Select model version',
+      selectStyle: 'Select style preset'
+    },
+    styles: {
+      anime: 'Anime',
+      '3d_animation': '3D Animation',
+      clay: 'Clay',
+      comic: 'Comic',
+      cyberpunk: 'Cyberpunk'
+    },
+    placeholders: {
+      prompt: 'Describe what you want to see in the video...',
+      text: 'Describe the scene you want to create...',
+      negativePrompt: 'Elements to avoid in the video...',
+      seed: 'Leave empty for random seed'
+    },
+    tooltips: {
+      no8sIn1080p: '8s videos are not available in 1080p quality',
+      noFastIn1080p: 'Fast motion is not available in 1080p quality',
+      noFastIn8s: 'Fast motion is only available for 5s videos',
+      motionModeDesc: 'Controls the speed of movement in the video',
+      v3_5: 'Older model with style presets',
+      v4: 'Standard model with good quality and speed',
+      v4_5: 'Latest model with best quality'
+    },
+    preview: {
+      title: 'Preview',
+      emptyState: 'Your generated video will appear here',
+      generating: 'Generating Video',
+      complete: 'complete',
+      error: 'Failed to generate video. Please try again.',
+      tryAgain: 'Something went wrong. Please try again with different settings.',
+      videoId: 'Video ID'
+    },
+    errors: {
+      invalidFileType: 'Please upload JPG, PNG, or WEBP images only',
+      imageRequired: 'Please upload an image',
+      textRequired: 'Please enter a text description',
+      promptRequired: 'Please enter a prompt',
+      seedRange: 'Seed must be between 0 and 2147483647'
+    },
+    advancedOptions: 'Advanced Options',
+    generating: 'Generating...',
+    generateButton: 'Generate Video'
   },
   
   // Pricing page
