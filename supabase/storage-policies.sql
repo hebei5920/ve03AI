@@ -6,10 +6,6 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('media', 'media', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 创建 test 存储桶（如果还不存在）
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('test', 'test', true)
-ON CONFLICT (id) DO NOTHING;
 
 -- 2. 设置 storage.objects 表的 RLS 策略
 

@@ -7,9 +7,9 @@ import { LanguageProvider } from '@/providers/language-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'NextJs',
-  description: 'NextJs',
-  keywords: 'NextJs',
+  title: 'Veo 3 - AI Video Generation with Real Voice',
+  description: 'Generate videos with perfectly synced audio, including sound effects, dialogue, and ambient noise. Make your stories come alive with Veo 3.',
+  keywords: 'AI video, AI voice, video generation, AI animation, synchronized audio, Veo 3, AI video generator',
 };
 
 export default function RootLayout({
