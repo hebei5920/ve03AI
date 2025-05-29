@@ -65,23 +65,30 @@ export interface TextToVideoParams {
 
 export class PixVerseService {
   private readonly API_BASE_URL = 'https://app-api.pixverse.ai/openapi/v2'
-  private readonly API_KEY: string
 
-  constructor(apiKey: string) {
-    this.API_KEY = apiKey
-  }
+ 
 
   private getHeaders() {
+    const apiKey = process.env.PV_KEY
+    if (!apiKey) {
+      throw new Error('PV_KEY environment variable is required')
+    }
+    
     return {
-      'API-KEY': 'sk-f118cb032eddfd57c827402ba8b67673',
+      'API-KEY': apiKey,
       'Ai-trace-id': uuidv4(),
       'Content-Type': 'application/json'
     }
   }
 
   private getUploadHeaders() {
+    const apiKey = process.env.PV_KEY
+    if (!apiKey) {
+      throw new Error('PV_KEY environment variable is required')
+    }
+    
     return {
-      'API-KEY': 'sk-f118cb032eddfd57c827402ba8b67673',
+      'API-KEY': apiKey,
       'Ai-trace-id': uuidv4()
     }
   }
@@ -163,11 +170,10 @@ export class PixVerseService {
 // 创建服务实例
 export function createPixVerseService(): PixVerseService {
   const apiKey = process.env.PV_KEY
-  console.log("apiKey+++++", apiKey);
-
+ 
   if (!apiKey) {
     throw new Error('PV_KEY environment variable is required')
   }
 
-  return new PixVerseService(apiKey)
+  return new PixVerseService()
 } 
