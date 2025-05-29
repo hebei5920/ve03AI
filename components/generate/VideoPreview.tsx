@@ -66,12 +66,7 @@ export default function VideoPreview({ videoId, status, progress, error }: Video
   if (status === 'error') {
     return (
       <div className="w-full">
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error || t('generator.preview.error') || 'Failed to generate video. Please try again.'}
-          </AlertDescription>
-        </Alert>
+         
         <div className="relative w-full h-0 pb-[56.25%] bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden">
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
             <AlertCircle className="h-12 w-12 text-red-500 mb-4" />

@@ -31,6 +31,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { useAuth } from '@/hooks/useAuth'
 
 interface ImageToVideoProps {
   onSubmit: (data: ImageToVideoFormData) => void
@@ -48,6 +49,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
   const { t } = useTranslation()
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { user } = useAuth()
 
   const { register, handleSubmit, watch, control, setValue, formState: { errors, isValid } } = useForm<ImageToVideoFormData>({
     defaultValues: {
@@ -533,12 +535,14 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
       <Button
         type="submit"
         className="w-full bg-orange-500 hover:bg-orange-600"
-        disabled={!imagePreview || isGenerating || !isValid}
+        disabled={!imagePreview || isGenerating || !isValid || !user}
       >
         {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {isGenerating
           ? (t('generator.generating') || 'Generating...')
-          : (t('generator.generateButton') || 'Generate Video')}
+          : !user 
+            ? (t('generator.loginRequired') || 'Please Login to Generate') 
+            : (t('generator.generateButton') || 'Generate Video')}
       </Button>
     </form>
   )

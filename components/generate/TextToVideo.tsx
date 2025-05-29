@@ -30,6 +30,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { useAuth } from '@/hooks/useAuth'
 
 interface TextToVideoProps {
   onSubmit: (data: TextToVideoFormData) => void
@@ -53,6 +54,7 @@ const ASPECT_RATIOS: { value: AspectRatio; label: string }[] = [
 
 export default function TextToVideo({ onSubmit, isGenerating }: TextToVideoProps) {
   const { t } = useTranslation()
+  const { user } = useAuth()
 
   const { register, handleSubmit, watch, control, setValue, formState: { errors, isValid } } = useForm<TextToVideoFormData>({
     defaultValues: {
@@ -471,12 +473,14 @@ export default function TextToVideo({ onSubmit, isGenerating }: TextToVideoProps
       <Button
         type="submit"
         className="w-full bg-orange-500 hover:bg-orange-600"
-        disabled={!watch('prompt') || isGenerating || !isValid}
+        disabled={!watch('prompt') || isGenerating || !isValid || !user}
       >
         {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {isGenerating 
           ? (t('generator.generating') || 'Generating...') 
-          : (t('generator.generateButton') || 'Generate Video')}
+          : !user 
+            ? (t('generator.loginRequired') || 'Please Login to Generate')
+            : (t('generator.generateButton') || 'Generate Video')}
       </Button>
     </form>
   )
