@@ -139,7 +139,7 @@ export class PixVerseService {
     if (!response.ok) {
       throw new Error(`PixVerse text to video generation failed: ${response.status}`)
     }
-
+  
     return await response.json()
   }
 

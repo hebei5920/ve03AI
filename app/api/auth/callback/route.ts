@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase-server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { AuthService } from '@/service/auth-service'
 
-export async function GET(request: Request) {
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') || '/'

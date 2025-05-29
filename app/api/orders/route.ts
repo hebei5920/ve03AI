@@ -13,7 +13,8 @@ const PRODUCT_TOKEN_LIST = [
   { key: 'prod_SL2Wik94PZXSNa', value: 700 }
 ]
 
-
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
 
 // GET - 获取用户订单
 export async function GET(request: NextRequest) {

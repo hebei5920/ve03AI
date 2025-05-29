@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase-server'
 import { createPixVerseService } from '@/service/pixverse-service'
 import { PrismaClient } from '@prisma/client'
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
@@ -10,7 +13,6 @@ export async function POST(request: NextRequest) {
     // 获取用户信息
     const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -37,18 +39,19 @@ export async function POST(request: NextRequest) {
     })
 
     const body = await request.json()
-    const { 
-      prompt, 
-      model, 
-      quality, 
-      duration, 
-      motionMode, 
-      negativePrompt, 
-      seed, 
-      style, 
+    const {
+      prompt,
+      model,
+      quality,
+      duration,
+      motionMode,
+      negativePrompt,
+      seed,
+      style,
       watermark,
-      aspectRatio 
+      aspectRatio
     } = body
+    console.log("body", body);
 
     // 验证必需参数
     if (!prompt || !model || !quality || !duration) {
@@ -74,8 +77,7 @@ export async function POST(request: NextRequest) {
       water_mark: watermark === 'true',
       aspect_ratio: aspectRatio || '16:9'
     }
-
-    const videoGenerationResult = await pixverseService.generateTextToVideo(videoGenerationParams)
+     const videoGenerationResult = await pixverseService.generateTextToVideo(videoGenerationParams)
 
     if (videoGenerationResult.ErrCode !== 0) {
       throw new Error(`Video generation failed: ${videoGenerationResult.ErrMsg}`)

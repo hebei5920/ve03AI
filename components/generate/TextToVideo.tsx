@@ -56,7 +56,6 @@ export default function TextToVideo({ onSubmit, isGenerating }: TextToVideoProps
 
   const { register, handleSubmit, watch, control, setValue, formState: { errors, isValid } } = useForm<TextToVideoFormData>({
     defaultValues: {
-      text: '',
       aspectRatio: '16:9',
       modelVersion: 'v4',
       quality: '720p',
@@ -88,29 +87,29 @@ export default function TextToVideo({ onSubmit, isGenerating }: TextToVideoProps
     <form onSubmit={handleSubmit(processSubmit)} className="space-y-6">
       <div>
         <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-          {t('generator.textInput.title') || 'Enter Your Text'}
+          {t('generator.textInput.title') || 'Enter Your Prompt'}
         </h3>
         
         <div>
           <div className="flex items-center justify-between mb-2">
-            <Label htmlFor="text">
-              {t('generator.textInput.instruction') || 'Text Description'}
+            <Label htmlFor="prompt">
+              {t('generator.textInput.instruction') || 'Video Description'}
             </Label>
             <span className="text-xs text-gray-500">
-              {watch('text').length}/2048
+              {watch('prompt').length}/2048
             </span>
           </div>
           <Textarea
-            id="text"
+            id="prompt"
             placeholder={t('generator.placeholders.text') || 'Describe the scene you want to create...'}
             className="resize-none h-40"
             maxLength={2048}
-            {...register('text', { required: true })}
+            {...register('prompt', { required: true })}
             disabled={isGenerating}
           />
-          {errors.text && (
+          {errors.prompt && (
             <p className="mt-1 text-sm text-red-500">
-              {t('generator.errors.textRequired') || 'Please enter a text description'}
+              {t('generator.errors.textRequired') || 'Please enter a video description'}
             </p>
           )}
         </div>
@@ -319,30 +318,6 @@ export default function TextToVideo({ onSubmit, isGenerating }: TextToVideoProps
           />
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <Label htmlFor="prompt">
-              {t('generator.params.prompt') || 'Prompt'}
-            </Label>
-            <span className="text-xs text-gray-500">
-              {watch('prompt').length}/2048
-            </span>
-          </div>
-          <Textarea
-            id="prompt"
-            placeholder={t('generator.placeholders.prompt') || 'Additional details for your video...'}
-            className="resize-none h-24"
-            maxLength={2048}
-            {...register('prompt', { required: true })}
-            disabled={isGenerating}
-          />
-          {errors.prompt && (
-            <p className="mt-1 text-sm text-red-500">
-              {t('generator.errors.promptRequired') || 'Please enter a prompt'}
-            </p>
-          )}
-        </div>
-
         <Accordion type="single" collapsible className="w-full" 
           defaultValue={watchModelVersion === 'v3.5' ? "advanced-options" : undefined}>
           <AccordionItem value="advanced-options">
@@ -496,7 +471,7 @@ export default function TextToVideo({ onSubmit, isGenerating }: TextToVideoProps
       <Button
         type="submit"
         className="w-full bg-orange-500 hover:bg-orange-600"
-        disabled={!watch('text') || isGenerating || !isValid}
+        disabled={!watch('prompt') || isGenerating || !isValid}
       >
         {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {isGenerating 

@@ -42,7 +42,6 @@ export interface ImageToVideoFormData extends BaseFormData {
 
 // Text to video specific data
 export interface TextToVideoFormData extends BaseFormData {
-  text: string
   aspectRatio: AspectRatio
 }
 

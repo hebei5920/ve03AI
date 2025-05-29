@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { UserService } from '@/service/user-service';
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 // GET - 获取用户积分信息
 export async function GET() {
   try {

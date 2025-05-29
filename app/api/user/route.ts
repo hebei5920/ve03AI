@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 import { AuthService } from '@/service/auth-service'
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     // 获取当前 Supabase 用户

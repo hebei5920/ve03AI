@@ -91,13 +91,29 @@ export default function VideoGenerator() {
     setItvId(null)
     
     try {
+      
+       
+      // Map form fields to API fields
+      const apiData = {
+        prompt: formData.prompt,
+        model: formData.modelVersion, // Map modelVersion to model
+        quality: formData.quality,
+        duration: formData.duration,
+        motionMode: formData.motionMode || 'normal',
+        negativePrompt: formData.negativePrompt || undefined,
+        seed: formData.seed || undefined,
+        style: formData.style || undefined,
+        watermark: formData.watermark?.toString() || 'false',
+        aspectRatio: formData.aspectRatio || '16:9'
+      }
+      
       // Call the text-to-video API
       const response = await fetch('/api/generate/text-to-video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(apiData)
       })
 
       const result = await response.json()

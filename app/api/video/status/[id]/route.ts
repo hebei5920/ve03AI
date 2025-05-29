@@ -4,6 +4,9 @@ import { createPixVerseService } from '@/service/pixverse-service'
 import { createServerMediaService } from '@/service/media-service'
 import { PrismaClient } from '@prisma/client'
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 const prisma = new PrismaClient()
 
 export async function GET(

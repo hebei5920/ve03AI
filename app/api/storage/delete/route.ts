@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerMediaService } from '@/service/media-service'
 import { createClient } from '@/lib/supabase-server'
 
+// Force dynamic rendering since we use cookies for authentication
+export const dynamic = 'force-dynamic'
+
 export async function DELETE(request: NextRequest) {
   try {
     // 检查用户认证
