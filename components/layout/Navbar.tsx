@@ -19,26 +19,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
+import { languages } from '@/i18n';
 export default function Navbar() {
   const { t, setLanguage, language } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const languages = [
-    { code: 'ar', name: '🇪🇬العربية' },
-    { code: 'de', name: '🇩🇪Deutsch' },
-    { code: 'en', name: '🇬🇧English' },
-    { code: 'es', name: '🇪🇸Español' },
-    { code: 'zh', name: '🇨🇳简体中文' },
-    { code: 'fr', name: '🇫🇷Français' },
-    { code: 'it', name: '🇮🇹Italiano' },
-    { code: 'ja', name: '🇯🇵日本語' },
-    { code: 'ko', name: '🇰🇷한국어' },
-    { code: 'nl', name: '🇳🇱Nederlands' },
-    { code: 'pt', name: '🇧🇷Português' },
-    { code: 'ru', name: '🇷🇺Русский' },
-    { code: 'tr', name: '🇹🇷Türkçe' },
-  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -72,9 +57,8 @@ export default function Navbar() {
                 <DropdownMenuItem
                   key={lang.code}
                   onClick={() => setLanguage(lang.code as SupportedLanguage)}
-                  className={`flex items-center gap-2 ${
-                    language === lang.code ? 'bg-accent' : ''
-                  }`}
+                  className={`flex items-center gap-2 ${language === lang.code ? 'bg-accent' : ''
+                    }`}
                 >
                   <span>{lang.name}</span>
                 </DropdownMenuItem>
@@ -94,22 +78,22 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="pr-0">
               <nav className="flex flex-col gap-4 mt-8">
-                <Link 
-                  href="/" 
+                <Link
+                  href="/"
                   className="px-4 py-2 text-sm font-medium rounded-md hover:bg-accent"
                   onClick={() => setIsOpen(false)}
                 >
                   {t('navbar.home')}
                 </Link>
-                <Link 
-                  href="/generate" 
+                <Link
+                  href="/generate"
                   className="px-4 py-2 text-sm font-medium rounded-md hover:bg-accent"
                   onClick={() => setIsOpen(false)}
                 >
                   {t('navbar.generate')}
                 </Link>
-                <Link 
-                  href="/pricing" 
+                <Link
+                  href="/pricing"
                   className="px-4 py-2 text-sm font-medium rounded-md hover:bg-accent"
                   onClick={() => setIsOpen(false)}
                 >

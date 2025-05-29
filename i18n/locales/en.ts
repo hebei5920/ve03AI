@@ -1,4 +1,134 @@
 export default {
+  // Common
+  common: {
+    backToHome: 'Back to Home',
+    and: 'and',
+    terms: 'Terms of Service',
+    privacy: 'Privacy Policy',
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success',
+    failed: 'Failed',
+    retry: 'Retry',
+    close: 'Close',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    save: 'Save',
+    edit: 'Edit',
+    delete: 'Delete',
+    download: 'Download',
+    upload: 'Upload',
+    refresh: 'Refresh',
+    back: 'Back',
+    next: 'Next',
+    previous: 'Previous',
+    details: 'Details',
+    all: 'All',
+    create: 'Create',
+    generate: 'Generate',
+    processing: 'Processing',
+    completed: 'Completed',
+    pending: 'Pending',
+    unknown: 'Unknown'
+  },
+
+  // Authentication
+  auth: {
+    signIn: {
+      title: 'Sign in to your account',
+      loggingIn: 'Logging in...',
+      continueWithGoogle: 'Continue with Google',
+      continueWithGithub: 'Continue with GitHub',
+      or: 'or',
+      termsMessage: 'By signing in, you agree to our'
+    }
+  },
+
+  // History
+  history: {
+    title: 'Generation History',
+    totalRecords: '{count} total records',
+    filters: {
+      all: 'All History',
+      textToVideo: 'Text to Video',
+      imageToVideo: 'Image to Video'
+    },
+    quickActions: {
+      generateNew: 'Generate New Video'
+    },
+    currentView: 'Current view:',
+    refreshData: 'Refresh',
+    empty: {
+      title: {
+        all: 'No history records',
+        textToVideo: 'No text-to-video records',
+        imageToVideo: 'No image-to-video records'
+      },
+      description: {
+        all: 'Start generating your first video!',
+        textToVideo: 'Try generating your first video from text!',
+        imageToVideo: 'Upload an image to generate your first video!'
+      },
+      action: 'Start Generating'
+    },
+    pagination: {
+      page: 'Page {current} of {total}'
+    },
+    status: {
+      completed: 'Completed',
+      processing: 'Processing',
+      failed: 'Failed',
+      pending: 'Pending'
+    },
+    timeAgo: {
+      justNow: 'Just now',
+      minutesAgo: '{minutes} minutes ago',
+      hoursAgo: '{hours} hours ago',
+      daysAgo: '{days} days ago'
+    },
+    processingMessage: 'Generating, please wait...',
+    failedMessage: 'Generation failed, please retry'
+  },
+
+  // History Detail
+  historyDetail: {
+    backToHistory: 'Back to History',
+    generatedVideo: 'Generated Video',
+    downloading: 'Downloading...',
+    downloadVideo: 'Download Video',
+    videoUnavailable: 'Video file unavailable',
+    downloadSuccess: 'Video downloaded successfully! File name: {fileName}',
+    downloadFailed: 'Download failed, please try again later',
+    openInNewTab: 'Download link opened in new tab',
+    
+    videoStatus: {
+      pending: 'Video is waiting to be generated',
+      processing: 'Video is being generated',
+      failed: 'Video generation failed',
+      noVideo: 'No video available'
+    },
+
+    info: {
+      createdAt: 'Created At',
+      videoSize: 'Video Size',
+      modelVersion: 'Model Version',
+      duration: 'Duration',
+      videoDimensions: 'Video Dimensions',
+      resolution: 'Resolution',
+      quality: 'Quality',
+      prompt: 'Prompt',
+      sourceImage: 'Source Image',
+      durationUnit: 'seconds'
+    },
+
+    type: {
+      textToVideo: 'Text to Video',
+      imageToVideo: 'Image to Video'
+    },
+
+    notFound: 'Record not found'
+  },
+
   // Navigation
   nav: {
     settings: 'Settings'

@@ -114,8 +114,8 @@ export default function Showcase() {
                 <div className="flex items-center justify-center h-full text-white">
                   <div className="text-center">
                     <Play className="h-16 w-16 mx-auto mb-4 text-orange-500" />
-                    <p className="text-lg">Video Playing: {activeVideo}</p>
-                    <p className="text-sm text-gray-400 mt-2">Press ESC to close</p>
+                    <p className="text-lg">{t('showcase.videoPlaying').replace('{id}', activeVideo)}</p>
+                    <p className="text-sm text-gray-400 mt-2">{t('showcase.pressEscToClose')}</p>
                   </div>
                 </div>
               </div>

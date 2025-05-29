@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { FaArrowLeft, FaDownload, FaPlay, FaClock, FaImage, FaFileAlt, FaVideo, FaCalendarAlt, FaUser, FaCog, FaSpinner, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
 import Image from 'next/image'
+import { useTranslation } from '@/providers/language-provider'
 
 interface HistoryDetail {
   id: string
@@ -46,11 +47,13 @@ function formatDate(dateString: string): string {
 
 // 格式化文件大小
 function formatFileSize(bytes?: number): string {
-  if (!bytes) return '未知'
+  const { t } = useTranslation()
+  
+  if (!bytes) return t('common.unknown')
   
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`
+  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
 }
 
 // 解析分辨率字符串
@@ -97,6 +100,7 @@ function getVideoDimensions(detail: HistoryDetail): { width: number, height: num
 }
 
 export default function HistoryDetailPage() {
+  const { t } = useTranslation()
   const params = useParams()
   const router = useRouter()
   const [detail, setDetail] = useState<HistoryDetail | null>(null)
@@ -123,10 +127,10 @@ export default function HistoryDetailPage() {
       if (data.success) {
         setDetail(data.data)
       } else {
-        setError(data.error || '获取详情失败')
+        setError(data.error || t('historyDetail.downloadFailed'))
       }
     } catch (err) {
-      setError('获取详情失败')
+      setError(t('historyDetail.downloadFailed'))
       console.error('Error fetching detail:', err)
     } finally {
       setLoading(false)
@@ -134,22 +138,17 @@ export default function HistoryDetailPage() {
   }
 
   const handleDownload = async () => {
-    if (!detail?.video?.url) {
-      setDownloadMessage({ type: 'error', text: '视频文件不可用' })
-      setTimeout(() => setDownloadMessage({ type: null, text: '' }), 3000)
+    if (!detail || !detail.video?.url) {
+      setDownloadMessage({ type: 'error', text: t('historyDetail.videoUnavailable') })
       return
     }
 
+    setIsDownloading(true)
+    
     try {
-      setIsDownloading(true)
-      setDownloadMessage({ type: null, text: '' })
-
       // 生成文件名
-      const timestamp = new Date(detail.createdAt).toISOString().slice(0, 10)
-      const typePrefix = detail.type === 'text-to-video' ? 'TTV' : 'ITV'
-      const videoFormat = detail.video.format || 'mp4'
-      const fileName = `${typePrefix}_${timestamp}_${detail.id.slice(-8)}.${videoFormat}`
-
+      const fileName = `ve03ai_video_${detail.id}_${Date.now()}.mp4`
+      
       console.log('开始下载:', detail.video.url)
 
       try {
@@ -194,7 +193,7 @@ export default function HistoryDetailPage() {
           window.URL.revokeObjectURL(downloadUrl)
           document.body.removeChild(a)
         }, 100)
-        
+
         setDownloadMessage({ type: 'success', text: `视频下载成功！文件名: ${fileName}` })
         
       } catch (fetchError) {
@@ -216,7 +215,7 @@ export default function HistoryDetailPage() {
           a.click()
           document.body.removeChild(a)
           
-          setDownloadMessage({ type: 'success', text: '已在新窗口中打开下载链接' })
+          setDownloadMessage({ type: 'success', text: t('historyDetail.openInNewTab') })
           
         } catch (linkError) {
           console.error('链接下载也失败:', linkError)
@@ -228,11 +227,9 @@ export default function HistoryDetailPage() {
       // 3秒后清除成功消息
       setTimeout(() => setDownloadMessage({ type: null, text: '' }), 3000)
 
-    } catch (error) {
-      console.error('Download failed:', error)
-      const errorMessage = error instanceof Error ? error.message : '下载失败，请稍后重试'
+    } catch (error: any) {
+      const errorMessage = error instanceof Error ? error.message : t('historyDetail.downloadFailed')
       setDownloadMessage({ type: 'error', text: errorMessage })
-      setTimeout(() => setDownloadMessage({ type: null, text: '' }), 5000)
     } finally {
       setIsDownloading(false)
     }
@@ -240,20 +237,21 @@ export default function HistoryDetailPage() {
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
-      'pending': { text: '等待中', variant: 'secondary' as const },
-      'processing': { text: '处理中', variant: 'default' as const },
-      'completed': { text: '已完成', variant: 'default' as const },
-      'failed': { text: '失败', variant: 'destructive' as const }
+      'pending': { text: t('history.status.pending'), variant: 'secondary' as const },
+      'processing': { text: t('history.status.processing'), variant: 'default' as const },
+      'completed': { text: t('history.status.completed'), variant: 'default' as const },
+      'failed': { text: t('history.status.failed'), variant: 'destructive' as const }
     }
     
-    return statusMap[status as keyof typeof statusMap] || { text: status, variant: 'secondary' as const }
+    const statusInfo = statusMap[status as keyof typeof statusMap] || { text: status, variant: 'secondary' as const }
+    return <Badge variant={statusInfo.variant}>{statusInfo.text}</Badge>
   }
 
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-lg">加载中...</div>
+          <div className="text-lg">{t('common.loading')}</div>
         </div>
       </div>
     )
@@ -264,10 +262,14 @@ export default function HistoryDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="text-lg text-red-500 mb-4">{error || '记录不存在'}</div>
-            <Button onClick={() => router.back()}>
-              <FaArrowLeft className="mr-2 h-4 w-4" />
-              返回
+            <div className="text-lg text-red-500 mb-4">{error || t('historyDetail.notFound')}</div>
+            <Button 
+              variant="outline" 
+              onClick={() => router.push('/history')}
+              className="flex items-center gap-2"
+            >
+              <FaArrowLeft className="h-4 w-4" />
+              {t('common.back')}
             </Button>
           </div>
         </div>
@@ -279,39 +281,34 @@ export default function HistoryDetailPage() {
   const videoDimensions = getVideoDimensions(detail)
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* 顶部导航 */}
-      <div className="flex items-center justify-between mb-6">
-        <Button 
-          variant="outline" 
-          onClick={() => router.back()}
-          className="flex items-center gap-2"
-        >
-          <FaArrowLeft className="h-4 w-4" />
-          返回历史记录
-        </Button>
-        
-        <div className="flex items-center gap-2">
-          {detail.type === 'text-to-video' ? (
-            <FaFileAlt className="h-5 w-5 text-blue-500" />
-          ) : (
-            <FaImage className="h-5 w-5 text-green-500" />
-          )}
-          <span className="text-lg font-semibold">
-            {detail.type === 'text-to-video' ? '文本转视频' : '图像转视频'}
-          </span>
-          <Badge variant={statusBadge.variant}>{statusBadge.text}</Badge>
-        </div>
-      </div>
-
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
       <div className="space-y-6">
+        {/* 顶部导航 */}
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            onClick={() => router.push('/history')}
+            className="flex items-center gap-2"
+          >
+            <FaArrowLeft className="h-4 w-4" />
+            {t('historyDetail.backToHistory')}
+          </Button>
+          
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">
+              {detail.type === 'text-to-video' ? t('historyDetail.type.textToVideo') : t('historyDetail.type.imageToVideo')}
+            </Badge>
+            {statusBadge}
+          </div>
+        </div>
+
         {/* 上半部分：视频播放区域 */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FaVideo className="h-5 w-5" />
-                生成的视频
+                {t('historyDetail.generatedVideo')}
                 {detail.video?.width && detail.video?.height && (
                   <Badge variant="outline" className="text-xs">
                     {detail.video.width} × {detail.video.height}
@@ -329,7 +326,7 @@ export default function HistoryDetailPage() {
                   ) : (
                     <FaDownload className="h-4 w-4" />
                   )}
-                  {isDownloading ? '下载中...' : '下载视频'}
+                  {isDownloading ? t('historyDetail.downloading') : t('historyDetail.downloadVideo')}
                 </Button>
               )}
             </CardTitle>
@@ -380,10 +377,10 @@ export default function HistoryDetailPage() {
                 <div className="text-center">
                   <FaPlay className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                   <p className="text-gray-500">
-                    {detail.status === 'pending' && '视频正在等待生成'}
-                    {detail.status === 'processing' && '视频正在生成中'}
-                    {detail.status === 'failed' && '视频生成失败'}
-                    {detail.status !== 'pending' && detail.status !== 'processing' && detail.status !== 'failed' && '暂无视频'}
+                    {detail.status === 'pending' && t('historyDetail.videoStatus.pending')}
+                    {detail.status === 'processing' && t('historyDetail.videoStatus.processing')}
+                    {detail.status === 'failed' && t('historyDetail.videoStatus.failed')}
+                    {detail.status !== 'pending' && detail.status !== 'processing' && detail.status !== 'failed' && t('historyDetail.videoStatus.noVideo')}
                   </p>
                 </div>
               </div>
@@ -399,7 +396,7 @@ export default function HistoryDetailPage() {
             <div className="flex items-center gap-3">
               <FaCalendarAlt className="h-4 w-4 text-gray-400 flex-shrink-0" />
               <div>
-                <span className="text-sm font-medium text-gray-500">创建时间</span>
+                <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.createdAt')}</span>
                 <div className="text-sm">{formatDate(detail.createdAt)}</div>
               </div>
             </div>
@@ -409,7 +406,7 @@ export default function HistoryDetailPage() {
               <div className="flex items-center gap-3">
                 <FaVideo className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 <div>
-                  <span className="text-sm font-medium text-gray-500">视频大小</span>
+                  <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.videoSize')}</span>
                   <div className="text-sm">{formatFileSize(detail.video.size)}</div>
                 </div>
               </div>
@@ -420,7 +417,7 @@ export default function HistoryDetailPage() {
               <div className="flex items-center gap-3">
                 <FaCog className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 <div>
-                  <span className="text-sm font-medium text-gray-500">模型版本</span>
+                  <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.modelVersion')}</span>
                   <div className="text-sm">
                     <Badge variant="outline">{detail.modelVersion}</Badge>
                   </div>
@@ -433,8 +430,8 @@ export default function HistoryDetailPage() {
               <div className="flex items-center gap-3">
                 <FaClock className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 <div>
-                  <span className="text-sm font-medium text-gray-500">视频时长</span>
-                  <div className="text-sm">{detail.duration} 秒</div>
+                  <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.duration')}</span>
+                  <div className="text-sm">{detail.duration} {t('historyDetail.info.durationUnit')}</div>
                 </div>
               </div>
             )}
@@ -444,7 +441,7 @@ export default function HistoryDetailPage() {
               <div className="flex items-center gap-3">
                 <FaVideo className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 <div>
-                  <span className="text-sm font-medium text-gray-500">视频尺寸</span>
+                  <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.videoDimensions')}</span>
                   <div className="text-sm">
                     <Badge variant="outline">{detail.video.width} × {detail.video.height}</Badge>
                   </div>
@@ -457,7 +454,7 @@ export default function HistoryDetailPage() {
               <div className="flex items-center gap-3">
                 <FaVideo className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 <div>
-                  <span className="text-sm font-medium text-gray-500">分辨率</span>
+                  <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.resolution')}</span>
                   <div className="text-sm">
                     <Badge variant="outline">{detail.video.resolution}</Badge>
                   </div>
@@ -470,7 +467,7 @@ export default function HistoryDetailPage() {
               <div className="flex items-center gap-3">
                 <FaVideo className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 <div>
-                  <span className="text-sm font-medium text-gray-500">视频质量</span>
+                  <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.quality')}</span>
                   <div className="text-sm">
                     <Badge variant="outline">{detail.quality}</Badge>
                   </div>
@@ -483,7 +480,7 @@ export default function HistoryDetailPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <FaFileAlt className="h-4 w-4 text-gray-400" />
-              <span className="text-sm font-medium text-gray-500">提示词</span>
+              <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.prompt')}</span>
             </div>
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm leading-relaxed">
               {detail.prompt}
@@ -495,12 +492,12 @@ export default function HistoryDetailPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FaImage className="h-4 w-4 text-gray-400" />
-                <span className="text-sm font-medium text-gray-500">源图像</span>
+                <span className="text-sm font-medium text-gray-500">{t('historyDetail.info.sourceImage')}</span>
               </div>
               <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <Image
                   src={detail.imageUrl}
-                  alt="源图像"
+                  alt={t('historyDetail.info.sourceImage')}
                   fill
                   className="object-cover"
                 />

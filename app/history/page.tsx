@@ -4,9 +4,11 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { FaHistory, FaFileAlt, FaImage, FaSpinner } from 'react-icons/fa'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { FaHistory, FaFileAlt, FaImage, FaSpinner, FaVideo, FaPlus, FaSync } from 'react-icons/fa'
 import HistoryItem from '@/components/history/HistoryItem'
+import { useTranslation } from '@/providers/language-provider'
+import { Badge } from '@/components/ui/badge'
 
 interface HistoryRecord {
   id: string
@@ -58,6 +60,8 @@ export default function HistoryPage() {
   const cache = useRef<Map<string, { data: HistoryRecord[], pagination: any, timestamp: number }>>(new Map())
   const isInitialized = useRef(false)
   const requestInProgress = useRef(false)
+
+  const { t } = useTranslation()
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -176,137 +180,135 @@ export default function HistoryPage() {
   })
 
   return (
-    <div className="h-screen overflow-hidden">
-      <div className="flex h-full">
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="flex h-[calc(100vh-8rem)] gap-6">
         {/* 左侧边栏 - 筛选和统计 */}
-        <div className="w-72 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-          <div className="p-5 border-b border-gray-200 dark:border-gray-700">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-              生成历史
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              共 {pagination.total} 条记录
-            </p>
-          </div>
-          
-          {/* 筛选选项 */}
-          <div className="p-4 space-y-2">
-            <button
-              onClick={() => handleTabChange('all')}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                activeTab === 'all'
-                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              <FaHistory className="h-4 w-4" />
-              <span>全部历史</span>
-              <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                {pagination.total}
-              </span>
-            </button>
-            
-            <button
-              onClick={() => handleTabChange('text')}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                activeTab === 'text'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              <FaFileAlt className="h-4 w-4" />
-              <span>文本转视频</span>
-              <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                {historyData.filter(item => item.type === 'text-to-video').length}
-              </span>
-            </button>
-            
-            <button
-              onClick={() => handleTabChange('image')}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                activeTab === 'image'
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              <FaImage className="h-4 w-4" />
-              <span>图像转视频</span>
-              <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                {historyData.filter(item => item.type === 'image-to-video').length}
-              </span>
-            </button>
-          </div>
+        <div className="w-72 flex-shrink-0">
+          <Card className="h-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                <FaHistory className="h-5 w-5" />
+                {t('history.title')}
+              </CardTitle>
+              <p className="text-sm text-gray-500">
+                共 {pagination.total} 条记录
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* 筛选选项 */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">筛选选项</h3>
+                
+                {/* 全部历史 */}
+                <Button
+                  variant={activeTab === 'all' ? 'default' : 'ghost'}
+                  className="w-full justify-between h-auto py-3 px-4"
+                  onClick={() => handleTabChange('all')}
+                >
+                  <div className="flex items-center gap-3">
+                    <FaHistory className="h-4 w-4" />
+                    <span>{t('history.filters.all')}</span>
+                  </div>
+                  <Badge variant="secondary" className="ml-2">
+                    {historyData.filter(item => item.type === 'text-to-video').length}
+                  </Badge>
+                </Button>
 
-          {/* 快速操作 */}
-          <div className="mt-auto p-4 border-t border-gray-200 dark:border-gray-700">
-            <Button
-              onClick={() => router.push('/generate')}
-              className="w-full"
-              size="sm"
-            >
-              生成新视频
-            </Button>
-          </div>
+                {/* 文本转视频 */}
+                <Button
+                  variant={activeTab === 'text' ? 'default' : 'ghost'}
+                  className="w-full justify-between h-auto py-3 px-4"
+                  onClick={() => handleTabChange('text')}
+                >
+                  <div className="flex items-center gap-3">
+                    <FaVideo className="h-4 w-4" />
+                    <span>{t('history.filters.textToVideo')}</span>
+                  </div>
+                  <Badge variant="secondary" className="ml-2">
+                    {historyData.filter(item => item.type === 'text-to-video').length}
+                  </Badge>
+                </Button>
+
+                {/* 图像转视频 */}
+                <Button
+                  variant={activeTab === 'image' ? 'default' : 'ghost'}
+                  className="w-full justify-between h-auto py-3 px-4"
+                  onClick={() => handleTabChange('image')}
+                >
+                  <div className="flex items-center gap-3">
+                    <FaImage className="h-4 w-4" />
+                    <span>{t('history.filters.imageToVideo')}</span>
+                  </div>
+                  <Badge variant="secondary" className="ml-2">
+                    {historyData.filter(item => item.type === 'image-to-video').length}
+                  </Badge>
+                </Button>
+              </div>
+
+              {/* 快速操作 */}
+              <div className="pt-4 border-t">
+                <Button
+                  onClick={() => router.push('/generate')}
+                  className="w-full flex items-center gap-2"
+                >
+                  <FaPlus className="h-4 w-4" />
+                  {t('history.quickActions.generateNew')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* 右侧内容区域 */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0">
           {/* 顶部操作栏 */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  当前显示: 
-                </span>
-                <span className="text-sm font-medium">
-                  {activeTab === 'all' && '全部历史'}
-                  {activeTab === 'text' && '文本转视频'}
-                  {activeTab === 'image' && '图像转视频'}
-                </span>
-              </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fetchHistory(activeTab, currentPage, true)}
-                disabled={isLoading}
-              >
-                {isLoading ? <FaSpinner className="animate-spin h-4 w-4" /> : '刷新'}
-              </Button>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">{t('history.currentView')}</span>
+              <Badge variant="outline">
+                {activeTab === 'all' && t('history.filters.all')}
+                {activeTab === 'text' && t('history.filters.textToVideo')}
+                {activeTab === 'image' && t('history.filters.imageToVideo')}
+              </Badge>
             </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchHistory(activeTab, currentPage, true)}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading ? <FaSpinner className="animate-spin h-4 w-4" /> : <FaSync className="h-4 w-4" />}
+              {t('history.refreshData')}
+            </Button>
           </div>
 
           {/* 历史记录列表 */}
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 overflow-hidden">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
                 <FaSpinner className="animate-spin h-8 w-8 text-orange-500" />
               </div>
             ) : filteredData.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <Card className="w-full max-w-md">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    {activeTab === 'all' && <FaHistory className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />}
-                    {activeTab === 'text' && <FaFileAlt className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />}
-                    {activeTab === 'image' && <FaImage className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />}
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      {activeTab === 'all' && '暂无历史记录'}
-                      {activeTab === 'text' && '暂无文本转视频记录'}
-                      {activeTab === 'image' && '暂无图像转视频记录'}
-                    </h3>
-                    <p className="text-gray-500 dark:text-gray-400 mb-4 text-center">
-                      {activeTab === 'all' && '开始生成您的第一个视频吧！'}
-                      {activeTab === 'text' && '尝试使用文本生成您的第一个视频！'}
-                      {activeTab === 'image' && '上传图像生成您的第一个视频！'}
-                    </p>
-                    <Button onClick={() => router.push('/generate')}>
-                      开始生成
-                    </Button>
-                  </CardContent>
-                </Card>
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <FaHistory className="h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  {activeTab === 'all' && t('history.empty.title.all')}
+                  {activeTab === 'text' && t('history.empty.title.textToVideo')}
+                  {activeTab === 'image' && t('history.empty.title.imageToVideo')}
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  {activeTab === 'all' && t('history.empty.description.all')}
+                  {activeTab === 'text' && t('history.empty.description.textToVideo')}
+                  {activeTab === 'image' && t('history.empty.description.imageToVideo')}
+                </p>
+                <Button onClick={() => router.push('/generate')}>
+                  {t('history.empty.action')}
+                </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 overflow-y-auto h-full pr-2">
                 {filteredData.map((item) => (
                   <HistoryItem
                     key={item.id}
@@ -319,30 +321,24 @@ export default function HistoryPage() {
 
           {/* 分页 */}
           {pagination.totalPages > 1 && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <div className="flex items-center justify-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(pagination.page - 1)}
-                  disabled={pagination.page <= 1}
-                >
-                  上一页
-                </Button>
-                
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  第 {pagination.page} 页，共 {pagination.totalPages} 页
-                </span>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(pagination.page + 1)}
-                  disabled={pagination.page >= pagination.totalPages}
-                >
-                  下一页
-                </Button>
-              </div>
+            <div className="flex items-center justify-between pt-6 border-t">
+              <Button
+                variant="outline"
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page === 1}
+              >
+                {t('common.previous')}
+              </Button>
+              <span className="text-sm text-gray-500">
+                第 {pagination.page} 页，共 {pagination.totalPages} 页
+              </span>
+              <Button
+                variant="outline"
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page === pagination.totalPages}
+              >
+                {t('common.next')}
+              </Button>
             </div>
           )}
         </div>

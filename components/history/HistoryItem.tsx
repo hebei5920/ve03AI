@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { FaClock, FaFileAlt, FaImage, FaInfoCircle } from 'react-icons/fa'
+import { FaClock, FaFileAlt, FaImage, FaInfoCircle, FaSpinner, FaExclamationTriangle } from 'react-icons/fa'
 import Link from 'next/link'
+import { useTranslation } from '@/providers/language-provider'
+import Image from 'next/image'
 
 interface HistoryItemProps {
   id: string
@@ -26,37 +28,24 @@ interface HistoryItemProps {
   quality?: string
 }
 
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'completed':
-      return <Badge variant="default" className="bg-green-500 text-xs px-1.5 py-0.5">已完成</Badge>
-    case 'processing':
-      return <Badge variant="default" className="bg-blue-500 text-xs px-1.5 py-0.5">生成中</Badge>
-    case 'failed':
-      return <Badge variant="destructive" className="text-xs px-1.5 py-0.5">失败</Badge>
-    case 'pending':
-      return <Badge variant="secondary" className="text-xs px-1.5 py-0.5">等待中</Badge>
-    default:
-      return <Badge variant="outline" className="text-xs px-1.5 py-0.5">{status}</Badge>
-  }
-}
-
 const formatTimeAgo = (dateString: string) => {
+  const { t } = useTranslation()
+  
   const date = new Date(dateString)
   const now = new Date()
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
   
   if (diffInSeconds < 60) {
-    return '刚刚'
+    return t('history.timeAgo.justNow')
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60)
-    return `${minutes}分钟前`
+    return t('history.timeAgo.minutesAgo').replace('{minutes}', minutes.toString())
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600)
-    return `${hours}小时前`
+    return t('history.timeAgo.hoursAgo').replace('{hours}', hours.toString())
   } else if (diffInSeconds < 2592000) {
     const days = Math.floor(diffInSeconds / 86400)
-    return `${days}天前`
+    return t('history.timeAgo.daysAgo').replace('{days}', days.toString())
   } else {
     return date.toLocaleDateString('zh-CN')
   }
@@ -73,6 +62,22 @@ const getVideoSize = (video?: { width?: number, height?: number, resolution?: st
   return null
 }
 
+// 状态组件
+function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation()
+  
+  switch (status) {
+    case 'completed':
+      return <Badge variant="default" className="bg-green-500 text-xs px-1.5 py-0.5">{t('history.status.completed')}</Badge>
+    case 'processing':
+      return <Badge variant="default" className="bg-blue-500 text-xs px-1.5 py-0.5">{t('history.status.processing')}</Badge>
+    case 'failed':
+      return <Badge variant="destructive" className="text-xs px-1.5 py-0.5">{t('history.status.failed')}</Badge>
+    default:
+      return <Badge variant="secondary" className="text-xs px-1.5 py-0.5">{t('history.status.pending')}</Badge>
+  }
+}
+
 export default function HistoryItem({
   id,
   type,
@@ -85,6 +90,7 @@ export default function HistoryItem({
   duration,
   quality
 }: HistoryItemProps) {
+  const { t } = useTranslation()
   const videoSize = getVideoSize(video)
   
   return (
@@ -107,14 +113,14 @@ export default function HistoryItem({
             <div className="flex items-start justify-between mb-1.5">
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {type === 'text-to-video' ? '文本转视频' : '图像转视频'}
+                  {type === 'text-to-video' ? t('historyDetail.type.textToVideo') : t('historyDetail.type.imageToVideo')}
                 </h3>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <FaClock className="h-3 w-3" />
                   <span>{formatTimeAgo(createdAt)}</span>
                 </div>
               </div>
-              {getStatusBadge(status)}
+              <StatusBadge status={status} />
             </div>
 
             {/* 提示词 */}
@@ -144,7 +150,7 @@ export default function HistoryItem({
               <Link href={`/history/detail/${id}`}>
                 <Button size="sm" variant="outline" className="text-xs h-7 px-2">
                   <FaInfoCircle className="h-3 w-3 mr-1" />
-                  详情
+                  {t('common.details')}
                 </Button>
               </Link>
             </div>
@@ -153,13 +159,13 @@ export default function HistoryItem({
             {status === 'processing' && (
               <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 mt-1.5">
                 <div className="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                生成中，请稍候...
+                {t('history.processingMessage')}
               </div>
             )}
 
             {status === 'failed' && (
               <div className="text-xs text-red-600 dark:text-red-400 mt-1.5">
-                生成失败，请重试
+                {t('history.failedMessage')}
               </div>
             )}
           </div>

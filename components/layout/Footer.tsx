@@ -3,26 +3,11 @@
 import Link from 'next/link';
 import { useTranslation } from '@/providers/language-provider';
 import { SupportedLanguage } from '@/i18n';
+import { languages } from '@/i18n/index'
 
 export default function Footer() {
   const { t, setLanguage, language } = useTranslation();
   const currentYear = new Date().getFullYear();
-
-  const languages = [
-    { code: 'ar', name: '🇪🇬العربية' },
-    { code: 'de', name: '🇩🇪Deutsch' },
-    { code: 'en', name: '🇬🇧English' },
-    { code: 'es', name: '🇪🇸Español' },
-    { code: 'zh', name: '🇨🇳简体中文' },
-    { code: 'fr', name: '🇫🇷Français' },
-    { code: 'it', name: '🇮🇹Italiano' },
-    { code: 'ja', name: '🇯🇵日本語' },
-    { code: 'ko', name: '🇰🇷한국어' },
-    { code: 'nl', name: '🇳🇱Nederlands' },
-    { code: 'pt', name: '🇧🇷Português' },
-    { code: 'ru', name: '🇷🇺Русский' },
-    { code: 'tr', name: '🇹🇷Türkçe' },
-  ];
 
   return (
     <footer className="border-t bg-background/80 backdrop-blur-sm">
