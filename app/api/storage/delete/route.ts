@@ -13,7 +13,7 @@ export async function DELETE(request: NextRequest) {
     
     if (authError || !user) {
       return NextResponse.json(
-        { error: '未认证用户' },
+        { error: 'Unauthorized user' },
         { status: 401 }
       )
     }
@@ -28,7 +28,7 @@ export async function DELETE(request: NextRequest) {
     
     if (!path && (!paths || paths.length === 0)) {
       return NextResponse.json(
-        { error: '未提供文件路径' },
+        { error: 'No file path provided' },
         { status: 400 }
       )
     }
@@ -41,7 +41,7 @@ export async function DELETE(request: NextRequest) {
       // 检查文件是否属于当前用户
       if (!path.startsWith(user.id + '/')) {
         return NextResponse.json(
-          { error: '无权限删除该文件' },
+          { error: 'No permission to delete this file' },
           { status: 403 }
         )
       }
@@ -50,14 +50,14 @@ export async function DELETE(request: NextRequest) {
       
       if (!success) {
         return NextResponse.json(
-          { error: '删除文件失败' },
+          { error: 'Failed to delete file' },
           { status: 500 }
         )
       }
       
       return NextResponse.json({
         success: true,
-        message: '文件删除成功'
+        message: 'File deleted successfully'
       })
     } else {
       // 批量删除
@@ -65,7 +65,7 @@ export async function DELETE(request: NextRequest) {
       const invalidPaths = paths.filter(p => !p.startsWith(user.id + '/'))
       if (invalidPaths.length > 0) {
         return NextResponse.json(
-          { error: '存在无权限删除的文件' },
+          { error: 'Some files cannot be deleted due to permission restrictions' },
           { status: 403 }
         )
       }
@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Delete error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '删除失败' },
+      { error: error instanceof Error ? error.message : 'Delete failed' },
       { status: 500 }
     )
   }

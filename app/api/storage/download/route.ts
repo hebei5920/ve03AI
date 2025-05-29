@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     
     if (authError || !user) {
       return NextResponse.json(
-        { error: '未认证用户' },
+        { error: 'Unauthorized user' },
         { status: 401 }
       )
     }
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     
     if (!path) {
       return NextResponse.json(
-        { error: '未提供文件路径' },
+        { error: 'No file path provided' },
         { status: 400 }
       )
     }
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     // 检查文件是否属于当前用户
     if (!path.startsWith(user.id + '/')) {
       return NextResponse.json(
-        { error: '无权限访问该文件' },
+        { error: 'No permission to access this file' },
         { status: 403 }
       )
     }
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       
       if (urlResult.error || !urlResult.data) {
         return NextResponse.json(
-          { error: '获取文件URL失败' },
+          { error: 'Failed to get file URL' },
           { status: 500 }
         )
       }
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Download error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '下载失败' },
+      { error: error instanceof Error ? error.message : 'Download failed' },
       { status: 500 }
     )
   }

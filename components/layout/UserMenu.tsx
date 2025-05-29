@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { useTranslation } from '@/providers/language-provider'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { FaUser, FaSignOutAlt, FaCreditCard } from 'react-icons/fa'
+import { FaUser, FaSignOutAlt, FaCreditCard, FaHistory } from 'react-icons/fa'
 import Link from 'next/link'
 
 interface UserMenuProps {
@@ -149,6 +149,25 @@ export default function UserMenu({ variant = 'default' }: UserMenuProps) {
                   <p className="text-xs text-gray-500 dark:text-gray-400">{userCredits} {t('user.available') || 'available'}</p>
                 </div>
               </div>
+            </div>
+
+            {/* History Section */}
+            <div className="flex flex-col gap-2 mt-4">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">
+                {t('user.history') || 'Generation History'}
+              </h4>
+              
+              <Link href="/history" onClick={() => setOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start gap-3 h-auto p-3">
+                  <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
+                    <FaHistory className="h-4 w-4 text-purple-500" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium">{t('user.allHistory') || 'Generation History'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('user.viewAllHistory') || 'View all generations'}</p>
+                  </div>
+                </Button>
+              </Link>
             </div>
           </div>
 

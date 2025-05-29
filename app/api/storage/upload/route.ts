@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: '未认证用户' },
+        { error: 'Unauthorized user' },
         { status: 401 }
       )
     }
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { error: '未提供文件' },
+        { error: 'No file provided' },
         { status: 400 }
       )
     }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '上传失败' },
+      { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }
     )
   }
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { error: '未认证用户' },
+        { error: 'Unauthorized user' },
         { status: 401 }
       )
     }
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Get files error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '获取文件列表失败' },
+      { error: error instanceof Error ? error.message : 'Failed to get file list' },
       { status: 500 }
     )
   }
