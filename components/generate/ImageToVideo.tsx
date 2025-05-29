@@ -31,7 +31,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { createClient } from '@/lib/supabase-client'
+
 interface ImageToVideoProps {
   onSubmit: (data: ImageToVideoFormData) => void
   isGenerating: boolean
@@ -47,9 +47,7 @@ const QUALITY_OPTIONS: { value: VideoQuality; label: string }[] = [
 export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoProps) {
   const { t } = useTranslation()
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
 
   const { register, handleSubmit, watch, control, setValue, formState: { errors, isValid } } = useForm<ImageToVideoFormData>({
     defaultValues: {
@@ -81,56 +79,21 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
       return
     }
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert(t('generator.errors.fileTooLarge') || 'File size must be less than 10MB')
+    // Validate file size (20MB - PixVerse limit)
+    if (file.size > 20 * 1024 * 1024) {
+      alert(t('generator.errors.fileTooLarge') || 'File size must be less than 20MB')
       return
     }
 
-    try {
-      setIsUploading(true)
+    // Set the file and create preview
+    setValue('image', file)
 
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
-
-      // Create FormData
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('userId', user.id)
-
-      // Upload image using API
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to upload image')
-      }
-
-      const result = await response.json()
-      console.log('Uploaded image URL:', result.url)
-      console.log('Uploaded image path:', result.path)
-
-      setValue('image', file)
-
-      // Create image preview
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
-    } catch (error) {
-      console.error('Error uploading image:', error)
-      alert(t('generator.errors.uploadFailed') || 'Failed to upload image')
-    } finally {
-      setIsUploading(false)
+    // Create image preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string)
     }
+    reader.readAsDataURL(file)
   }
 
   // Remove selected image
@@ -148,11 +111,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
   // Check if fast motion is available
   const isFastMotionAvailable = watchDuration === 5 && watchQuality !== '1080p'
 
-  // Format quality value for display
-  const getQualityValue = (value: number) => {
-    const qualities = ['360p', '540p', '720p', '1080p']
-    return qualities[value]
-  }
+
 
   // Process form submission
   const processSubmit = (data: ImageToVideoFormData) => {
@@ -173,7 +132,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
             className="hidden"
             accept=".jpg,.jpeg,.png,.webp"
             onChange={handleFileChange}
-            disabled={isGenerating || isUploading}
+            disabled={isGenerating}
           />
 
           {!imagePreview ? (
@@ -181,18 +140,12 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer"
             >
-              {isUploading ? (
-                <Loader2 className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
-              ) : (
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
-              )}
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {isUploading
-                  ? (t('generator.imageUpload.uploading') || 'Uploading...')
-                  : (t('generator.imageUpload.instruction') || 'Click or drag and drop to upload an image')}
+                {t('generator.imageUpload.instruction') || 'Click or drag and drop to upload an image'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-500">
-                {t('generator.imageUpload.formats') || 'JPG, PNG or WEBP (max 10MB)'}
+                {t('generator.imageUpload.formats') || 'JPG, PNG or WEBP (max 20MB)'}
               </p>
               <Button
                 type="button"
@@ -203,11 +156,9 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
                   e.stopPropagation()
                   fileInputRef.current?.click()
                 }}
-                disabled={isGenerating || isUploading}
+                disabled={isGenerating}
               >
-                {isUploading
-                  ? (t('generator.imageUpload.uploading') || 'Uploading...')
-                  : (t('generator.imageUpload.button') || 'Select Image')}
+                {t('generator.imageUpload.button') || 'Select Image'}
               </Button>
             </div>
           ) : (
@@ -584,6 +535,7 @@ export default function ImageToVideo({ onSubmit, isGenerating }: ImageToVideoPro
         className="w-full bg-orange-500 hover:bg-orange-600"
         disabled={!imagePreview || isGenerating || !isValid}
       >
+        {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {isGenerating
           ? (t('generator.generating') || 'Generating...')
           : (t('generator.generateButton') || 'Generate Video')}

@@ -41,5 +41,5 @@ CREATE POLICY "Public Access" ON storage.objects
     TO public
     USING ( bucket_id = 'media' );
 
--- 4. 确保 RLS 已启用
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY; 
+-- -- 4. 确保 RLS 已启用
+-- ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY; 

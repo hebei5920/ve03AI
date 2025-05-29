@@ -14,7 +14,7 @@ model User {
   email String  @unique
 
   // OAuth Provider Information
-  supabaseId      String?  @unique @map("supabase_id") // Supabase Auth user ID
+  supabaseId      String   @unique @map("supabase_id") // Supabase Auth user ID
   provider        String?  // "google", "github", "email", etc.
   providerUserId  String?  @map("provider_user_id") // Provider's unique user ID
   
@@ -46,6 +46,8 @@ model User {
 
   // Relationships
   orders          Order[]
+  ttvs            TTV[]
+  itvs            ITV[]
 
   @@map("users")
 }
@@ -68,4 +70,70 @@ model Order {
   user          User?    @relation(fields: [userId], references: [supabaseId])
 
   @@map("orders")
+}
+
+
+model TTV {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+  videoId       String?  @unique
+  pvid          BigInt   // PixVerse video ID
+  prompt        String   @db.Text
+  negativePrompt String? @db.Text
+  model         String   // v3.5, v4, v4.5
+  quality       String   // 360p, 540p, 720p, 1080p
+  duration      Int      // 5 or 8
+  motionMode    String   // normal or fast
+  aspectRatio   String   // 16:9, 4:3, 1:1, 3:4, 9:16
+  seed          Int?
+  style         String?  // anime, 3d_animation, clay, comic, cyberpunk (only for v3.5)
+  watermark     Boolean  @default(false)
+  status        Int      // 1: success, 5: generating, 7: moderation failed, 8: failed
+  user          User     @relation(fields: [userId], references: [supabaseId])
+  video         Video?   @relation(fields: [videoId], references: [id])
+
+  @@index([userId])
+  @@index([videoId])
+}
+
+model ITV {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+  videoId       String?  @unique
+  imageId       BigInt   // ID from Upload image API
+  imageURL      String   @map("image_url") // URL from storage upload
+  pvid          BigInt   // PixVerse video ID
+  prompt        String   @db.Text
+  negativePrompt String? @db.Text
+  model         String   // v3.5, v4, v4.5
+  quality       String   // 360p, 540p, 720p, 1080p
+  duration      Int      // 5 or 8
+  motionMode    String   // normal or fast
+  seed          Int?
+  style         String?  // anime, 3d_animation, clay, comic, cyberpunk (only for v3.5)
+  watermark     Boolean  @default(false)
+  status        Int      // 1: success, 5: generating, 7: moderation failed, 8: failed
+  user          User     @relation(fields: [userId], references: [supabaseId])
+  video         Video?   @relation(fields: [videoId], references: [id])
+
+  @@index([userId])
+  @@index([videoId])
+}
+
+model Video {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  url           String
+  width         Int?
+  height        Int?
+  size          Int?     // video size in bytes
+  ttv           TTV?
+  itv           ITV?
+
+  @@index([createdAt])
 }

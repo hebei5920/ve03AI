@@ -1,83 +1,127 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from '@/providers/language-provider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import ImageToVideo from './ImageToVideo'
 import TextToVideo from './TextToVideo'
 import VideoPreview from './VideoPreview'
-import { GenerationFormData, VideoStatus } from './types'
+import { GenerationFormData, ImageToVideoFormData } from './types'
+import { useVideoPolling } from './hooks/useVideoPolling'
 
 export default function VideoGenerator() {
   const { t } = useTranslation()
-  const [videoStatus, setVideoStatus] = useState<VideoStatus>('idle')
-  const [progress, setProgress] = useState(0)
-  const [videoId, setVideoId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [itvId, setItvId] = useState<string | null>(null)
   
-  // For mocking the progress increment
-  const progressInterval = useRef<NodeJS.Timeout | null>(null)
-
-  // Clean up interval on unmount
-  useEffect(() => {
-    return () => {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current)
-      }
+  // 使用轮询Hook
+  const videoPolling = useVideoPolling({
+    onComplete: (videoUrl) => {
+      console.log('Video generation completed:', videoUrl)
+    },
+    onError: (error) => {
+      console.error('Video generation error:', error)
     }
-  }, [])
+  })
 
-  // Mock function to simulate video generation with progress
-  const generateVideo = async (formData: GenerationFormData) => {
+  // Generate image to video
+  const generateImageToVideo = async (formData: ImageToVideoFormData) => {
     // Prevent multiple requests
-    if (videoStatus === 'generating') return
+    if (videoPolling.status === 'generating') return
     
-    // Reset state
-    setVideoStatus('generating')
-    setProgress(0)
-    setVideoId(null)
-    setError(null)
+    // Reset previous state and immediately set to generating
+    videoPolling.resetState()
+    videoPolling.setGenerating() // 立即设置为generating状态
+    setItvId(null)
     
     try {
-      // Simulate progress updates
-      progressInterval.current = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 100) {
-            if (progressInterval.current) clearInterval(progressInterval.current)
-            return 100
-          }
-          // Progress in chunks as specified in requirements
-          if (prev < 25) return 25
-          if (prev < 50) return 50
-          if (prev < 75) return 75
-          return 100
-        })
-      }, 750)
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      // Simulate failure 10% of the time
-      if (Math.random() < 0.1) {
-        throw new Error('Video generation failed')
+      if (!formData.image) {
+        throw new Error('No image selected')
       }
+
+      // Create FormData for API request
+      const apiFormData = new FormData()
+      apiFormData.append('file', formData.image)
+      apiFormData.append('prompt', formData.prompt)
+      apiFormData.append('model', formData.modelVersion)
+      apiFormData.append('quality', formData.quality)
+      apiFormData.append('duration', formData.duration.toString())
+      apiFormData.append('motionMode', formData.motionMode || 'normal')
       
-      // Mock successful response
-      const timestamp = Date.now()
-      const newVideoId = formData.inputType === 'image' 
-        ? `mock_img_${timestamp}` 
-        : `mock_text_${timestamp}`
-      
-      setVideoId(newVideoId)
-      setVideoStatus('success')
+      if (formData.negativePrompt) {
+        apiFormData.append('negativePrompt', formData.negativePrompt)
+      }
+      if (formData.seed) {
+        apiFormData.append('seed', formData.seed.toString())
+      }
+      if (formData.style) {
+        apiFormData.append('style', formData.style)
+      }
+      apiFormData.append('watermark', formData.watermark?.toString() || 'false')
+
+      // Call the API (this will return quickly with generating status)
+      const response = await fetch('/api/generate/image-to-video', {
+        method: 'POST',
+        body: apiFormData
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to generate video')
+      }
+
+      // Video generation started - begin polling with real ID
+      setItvId(result.data.itvId)
+      videoPolling.startPolling(result.data.itvId)
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
-      setVideoStatus('error')
-    } finally {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current)
+      // 使用Hook的错误处理
+      videoPolling.setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+    }
+  }
+
+  // Generate text to video
+  const generateTextToVideo = async (formData: any) => {
+    // Prevent multiple requests
+    if (videoPolling.status === 'generating') return
+    
+    // Reset state and immediately set to generating
+    videoPolling.resetState()
+    videoPolling.setGenerating() // 立即设置为generating状态
+    setItvId(null)
+    
+    try {
+      // Call the text-to-video API
+      const response = await fetch('/api/generate/text-to-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to generate video')
       }
-      setProgress(100)
+
+      // Video generation started - begin polling
+      setItvId(result.data.itvId)
+      videoPolling.startPolling(result.data.itvId)
+
+    } catch (err) {
+      // 使用Hook的错误处理
+      videoPolling.setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+    }
+  }
+
+  // Main generate function
+  const generateVideo = async (formData: GenerationFormData) => {
+    if (formData.inputType === 'image') {
+      await generateImageToVideo(formData as ImageToVideoFormData)
+    } else {
+      await generateTextToVideo(formData)
     }
   }
 
@@ -109,14 +153,14 @@ export default function VideoGenerator() {
                 <TabsContent value="image" className="mt-0">
                   <ImageToVideo 
                     onSubmit={(data) => generateVideo({...data, inputType: 'image'})} 
-                    isGenerating={videoStatus === 'generating'}
+                    isGenerating={videoPolling.status === 'generating'}
                   />
                 </TabsContent>
                 
                 <TabsContent value="text" className="mt-0">
                   <TextToVideo 
                     onSubmit={(data) => generateVideo({...data, inputType: 'text'})} 
-                    isGenerating={videoStatus === 'generating'}
+                    isGenerating={videoPolling.status === 'generating'}
                   />
                 </TabsContent>
               </div>
@@ -128,10 +172,10 @@ export default function VideoGenerator() {
                 </h3>
                 
                 <VideoPreview 
-                  videoId={videoId}
-                  status={videoStatus}
-                  progress={progress}
-                  error={error}
+                  videoId={videoPolling.videoId}
+                  status={videoPolling.status}
+                  progress={videoPolling.progress}
+                  error={videoPolling.error}
                 />
               </div>
             </div>

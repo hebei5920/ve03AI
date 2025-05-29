@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { TextToVideoFormData, ModelVersion, VideoQuality, VideoDuration, VideoStyle, AspectRatio } from './types'
 import { useForm, Controller } from 'react-hook-form'
-import { Info } from 'lucide-react'
+import { Info, Loader2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -498,6 +498,7 @@ export default function TextToVideo({ onSubmit, isGenerating }: TextToVideoProps
         className="w-full bg-orange-500 hover:bg-orange-600"
         disabled={!watch('text') || isGenerating || !isValid}
       >
+        {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {isGenerating 
           ? (t('generator.generating') || 'Generating...') 
           : (t('generator.generateButton') || 'Generate Video')}

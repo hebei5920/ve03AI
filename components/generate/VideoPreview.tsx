@@ -1,10 +1,10 @@
 'use client'
 
+import React from 'react'
 import { useTranslation } from '@/providers/language-provider'
 import { VideoStatus } from './types'
-import { AlertCircle } from 'lucide-react'
+import { Play, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Progress } from '@/components/ui/progress'
 import dynamic from 'next/dynamic'
 
 // Dynamically import ReactPlayer to avoid SSR issues
@@ -50,7 +50,9 @@ export default function VideoPreview({ videoId, status, progress, error }: Video
             {t('generator.preview.generating') || 'Generating Video'}
           </p>
           <div className="w-full max-w-xs mb-2">
-            <Progress value={progress} className="h-2 bg-gray-200 dark:bg-gray-700" />
+            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-orange-500 rounded-full" style={{ width: `${progress}%` }}></div>
+            </div>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {progress}% {t('generator.preview.complete') || 'complete'}
@@ -86,28 +88,30 @@ export default function VideoPreview({ videoId, status, progress, error }: Video
   return (
     <div className="w-full">
       <div className="relative w-full h-0 pb-[56.25%] rounded-lg overflow-hidden bg-black">
-        <ReactPlayer
-          url={`https://mockvid.com/${videoId}.mp4`}
-          width="100%"
-          height="100%"
-          className="absolute top-0 left-0"
-          controls
-          playing
-          config={{
-            file: {
-              attributes: {
-                controlsList: 'nodownload', // Disable download button
+        {videoId && (
+          <ReactPlayer
+            url={videoId}
+            width="100%"
+            height="100%"
+            className="absolute top-0 left-0"
+            controls
+            playing
+            config={{
+              file: {
+                attributes: {
+                  controlsList: 'nodownload', // Disable download button
+                },
               },
-            },
-          }}
-          onError={() => {
-            console.error('Video playback error')
-          }}
-        />
+            }}
+            onError={() => {
+              console.error('Video playback error')
+            }}
+          />
+        )}
       </div>
       <div className="mt-4 flex items-center justify-between">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {t('generator.preview.videoId') || 'Video ID'}: {videoId}
+          {t('generator.preview.videoReady') || 'Video ready for playback'}
         </p>
       </div>
     </div>

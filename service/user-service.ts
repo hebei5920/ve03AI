@@ -258,4 +258,33 @@ export class UserService {
       throw error;
     }
   }
+
+  /**
+   * 更新用户套餐
+   */
+  static async updateUserPlan(userId: number, plan: string): Promise<any> {
+    try {
+      // 根据套餐类型设置对应的积分
+      const planCredits = {
+        free: 10,
+        basic: 100,
+        pro: 500,
+        enterprise: 2000
+      };
+
+      const credits = planCredits[plan as keyof typeof planCredits] || 10;
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { 
+          plan, 
+          credits 
+        }
+      });
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user plan:', error);
+      throw new Error('更新用户套餐失败');
+    }
+  }
 } 
